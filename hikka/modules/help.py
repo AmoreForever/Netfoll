@@ -208,7 +208,7 @@ class HelpMod(loader.Module):
         await utils.answer(
             message,
             reply
-            + (f"\n\n{self.strings('not_exact')}" if not exact else "")
+            + ("" if exact else f"\n\n{self.strings('not_exact')}")
             + (
                 f"\n\n{self.strings('core_notice')}"
                 if module.__origin__.startswith("<core")

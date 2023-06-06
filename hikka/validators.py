@@ -6,6 +6,7 @@
 # Netfoll Team modifided Hikka files for Netfoll
 # 🌐 https://github.com/MXRRI/Netfoll
 
+import contextlib
 import functools
 import re
 import typing
@@ -227,7 +228,7 @@ class Integer(Validator):
     ) -> typing.Union[int, None]:
         try:
             value = int(str(value).strip())
-        except ValueError:
+        except ValueError as e:
             raise ValidationError(f"Passed value ({value}) must be a number")
 
         if minimum is not None and value < minimum:
@@ -891,11 +892,8 @@ class Union(Validator):
         validators: list,
     ) -> ConfigAllowedTypes:
         for validator in validators:
-            try:
+            with contextlib.suppress(ValidationError):
                 return validator.validate(value)
-            except ValidationError:
-                pass
-
         raise ValidationError(f"Passed value ({value}) is not valid")
 
 
