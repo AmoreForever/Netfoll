@@ -292,11 +292,8 @@ async def get_user(message: Message) -> typing.Optional[User]:
         return await message.client.get_entity(message.sender_id)
 
     if isinstance(message.peer_id, (PeerChannel, PeerChat)):
-        try:
+        with contextlib.suppress(Exception):
             return await message.client.get_entity(message.sender_id)
-        except Exception:
-            pass
-
         async for user in message.client.iter_participants(
             message.peer_id,
             aggressive=True,
@@ -480,14 +477,12 @@ async def answer(
                 return
 
             reply_markup = message.client.loader.inline._normalize_markup(reply_markup)
-            result = await message.client.loader.inline.form(
+            return await message.client.loader.inline.form(
                 response,
                 message=message if message.out else get_chat_id(message),
                 reply_markup=reply_markup,
                 **kwargs,
             )
-            return result
-
     if isinstance(message, (InlineMessage, InlineCall)):
         await message.edit(response)
         return message
@@ -677,7 +672,7 @@ async def set_avatar(
 
     await fw_protect()
 
-    try:
+    with contextlib.suppress(Exception):
         await client.delete_messages(
             peer,
             message_ids=[
@@ -688,9 +683,6 @@ async def set_avatar(
                 ).message.id
             ],
         )
-    except Exception:
-        pass
-
     return True
 
 
@@ -860,8 +852,8 @@ async def asset_channel(
         except Exception:
             folder = None
 
-        if folder is not None and not any(
-            peer.id == getattr(folder_peer, "channel_id", None)
+        if folder is not None and all(
+            peer.id != getattr(folder_peer, "channel_id", None)
             for folder_peer in folder.include_peers
         ):
             folder.include_peers += [await client.get_input_entity(peer)]
@@ -942,7 +934,7 @@ def get_named_platform() -> str:
     Returns formatted platform name
     :return: Platform name
     """
-    try:
+    with contextlib.suppress(Exception):
         if os.path.isfile("/proc/device-tree/model"):
             with open("/proc/device-tree/model") as f:
                 model = f.read()
@@ -950,18 +942,11 @@ def get_named_platform() -> str:
                     return f"🍊 {model}"
 
                 return f"🍇 {model}" if "Raspberry" in model else f"❓ {model}"
-    except Exception:
-        # In case of weird fs, aka Termux
-        pass
-
-    try:
+    with contextlib.suppress(Exception):
         from platform import uname
 
         if "microsoft-standard" in uname().release:
             return "🍁 WSL"
-    except Exception:
-        pass
-
     if "UBUNTU" in os.environ:
         return "🦾 GoormIDE"
 
@@ -983,10 +968,7 @@ def get_named_platform() -> str:
     if "PYTHONDONTWRITEBYTECODE" in os.environ:
         return "🧩 Back4App"
 
-    if "DOCKER" in os.environ:
-        return "🐳 Docker"
-
-    return f"👾 {platform.system()}"
+    return "🐳 Docker" if "DOCKER" in os.environ else f"👾 {platform.system()}"
 
 
 def get_platform_emoji(client: typing.Optional[CustomTelegramClient] = None) -> str:
@@ -1465,7 +1447,7 @@ def find_caller(
     :param stack: Stack to search in
     :return: Command-caller or None
     """
-    caller = next(
+    if caller := next(
         (
             frame_info
             for frame_info in stack or inspect.stack()
@@ -1478,9 +1460,16 @@ def find_caller(
             )
         ),
         None,
-    )
-
-    if not caller:
+    ):
+        return next(
+            (
+                getattr(cls_, caller.function, None)
+                for cls_ in caller.frame.f_globals.values()
+                if inspect.isclass(cls_) and issubclass(cls_, Module)
+            ),
+            None,
+        )
+    else:
         return next(
             (
                 frame_info.frame.f_locals["func"]
@@ -1494,15 +1483,6 @@ def find_caller(
             ),
             None,
         )
-
-    return next(
-        (
-            getattr(cls_, caller.function, None)
-            for cls_ in caller.frame.f_globals.values()
-            if inspect.isclass(cls_) and issubclass(cls_, Module)
-        ),
-        None,
-    )
 
 
 def validate_html(html: str) -> str:

@@ -1075,7 +1075,7 @@ class LoaderMod(loader.Module):
             return
 
         if re.search(r"# ?scope: ?netfoll_min", doc):
-            ver = re.search(r"# ?scope: ?netfoll_min ((?:\d+\.){2}\d+)", doc).group(1)
+            ver = re.search(r"# ?scope: ?netfoll_min ((?:\d+\.){2}\d+)", doc)[1]
             ver_ = tuple(map(int, ver.split(".")))
             if main.__version__ < ver_:
                 if isinstance(message, Message):
@@ -1102,7 +1102,7 @@ class LoaderMod(loader.Module):
                 return
 
         developer = re.search(r"# ?meta developer: ?(.+)", doc)
-        developer = developer.group(1) if developer else False
+        developer = developer[1] if developer else False
 
         blob_link = self.strings("blob_link") if blob_link else ""
 
@@ -1122,7 +1122,7 @@ class LoaderMod(loader.Module):
                     "Can't parse classname from code, using legacy uid instead",
                     exc_info=True,
                 )
-                uid = "__extmod_" + str(uuid.uuid4())
+                uid = f"__extmod_{str(uuid.uuid4())}"
         else:
             if name.startswith(self.config["MODULES_REPO"]):
                 name = name.split("/")[-1].split(".py")[0]
@@ -1161,13 +1161,13 @@ class LoaderMod(loader.Module):
             )
 
         async with (dragon.import_lock if is_dragon else lambda _: FakeLock())(
-            self._client
-        ):
+                self._client
+            ):
             with (
-                self._client.dragon_compat.misc.modules_help.get_notifier
-                if is_dragon
-                else FakeNotifier
-            )() as notifier:
+                        self._client.dragon_compat.misc.modules_help.get_notifier
+                        if is_dragon
+                        else FakeNotifier
+                    )() as notifier:
                 try:
                     try:
                         spec = ModuleSpec(
@@ -1423,9 +1423,7 @@ class LoaderMod(loader.Module):
                 )
 
                 if is_dragon:
-                    instance.name = (
-                        "Dragon" + notifier.modname[0].upper() + notifier.modname[1:]
-                    )
+                    instance.name = f"Dragon{notifier.modname[0].upper()}{notifier.modname[1:]}"
                     instance.commands = notifier.commands
                     self.allmodules.register_dragon(dragon_module, instance)
                 else:

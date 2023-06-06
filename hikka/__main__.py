@@ -1,5 +1,6 @@
 """Entry point. Checks for user and starts main script"""
 
+
 # ©️ Dan Gazizullin, 2021-2023
 # This file is a part of Hikka Userbot
 # 🌐 https://github.com/hikariatama/Hikka
@@ -99,7 +100,7 @@ else:
         log.init()
 
         from . import main
-    except (ModuleNotFoundError, ImportError) as e:
+    except ImportError as e:
         print(f"{str(e)}\n🔄 Attempting dependencies installation... Just wait ⏱")
 
         subprocess.run(

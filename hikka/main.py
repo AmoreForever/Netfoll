@@ -453,7 +453,7 @@ class Hikka:
                     connection=self.conn,
                     proxy=self.proxy,
                     connection_retries=None,
-                    device_model=(f"Netfoll UB"),
+                    device_model="Netfoll UB",
                     app_version=(f"Netfoll v{netver[0]}.{netver[1]}.{netver[2]}"),
                 )
 
