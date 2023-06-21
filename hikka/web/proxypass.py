@@ -103,11 +103,7 @@ class ProxyPasser:
             except asyncio.TimeoutError:
                 self.kill()
                 self._tunnel_url = None
-                if no_retry:
-                    return None
-
-                return await self.get_url(port, no_retry=True)
-
+                return None if no_retry else await self.get_url(port, no_retry=True)
             logger.debug("Proxy pass tunnel url to port %d: %s", port, self._tunnel_url)
 
             return self._tunnel_url

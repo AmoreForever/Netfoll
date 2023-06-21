@@ -185,9 +185,7 @@ class NetfollBackupMod(loader.Module):
             )
 
             backup = io.BytesIO(json.dumps(self._db).encode("utf-8"))
-            backup.name = "netfoll-db-backup-{}.json".format(
-                getattr(datetime, "datetime", datetime).now().strftime("%d-%m-%Y-%H-%M")
-            )
+            backup.name = f'netfoll-db-backup-{getattr(datetime, "datetime", datetime).now().strftime("%d-%m-%Y-%H-%M")}.json'
 
             await self._client.send_file(self._backup_channel, backup)
             self.set("last_backup", round(time.time()))

@@ -151,10 +151,7 @@ class NetfollInfoMod(loader.Module):
             ] = "https://github.com/MXRRI/Netfoll/raw/stable/assets/banner.png"
 
     def _render_info(self, inline: bool) -> str:
-        me = '<b><a href="tg://user?id={}">{}</a></b>'.format(
-            self._me.id,
-            utils.escape_html(get_display_name(self._me)),
-        )
+        me = f'<b><a href="tg://user?id={self._me.id}">{utils.escape_html(get_display_name(self._me))}</a></b>'
         build = utils.get_commit_url()
         _version = f'<i>{version.branch} {".".join(list(map(str, list(version.netver))))} {version.netrev}</i>'
         prefix = f"«<code>{utils.escape_html(self.get_prefix())}</code>»"

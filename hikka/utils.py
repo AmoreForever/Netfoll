@@ -934,7 +934,7 @@ def get_named_platform() -> str:
     Returns formatted platform name
     :return: Platform name
     """
-    try:
+    with contextlib.suppress(Exception):
         if os.path.isfile("/proc/device-tree/model"):
             with open("/proc/device-tree/model") as f:
                 model = f.read()
@@ -942,18 +942,11 @@ def get_named_platform() -> str:
                     return f"🍊 {model}"
 
                 return f"🍇 {model}" if "Raspberry" in model else f"❓ {model}"
-    except Exception:
-        # In case of weird fs, aka Termux
-        pass
-
-    try:
+    with contextlib.suppress(Exception):
         from platform import uname
 
         if "microsoft-standard" in uname().release:
             return "🍁 WSL"
-    except Exception:
-        pass
-
     if "UBUNTU" in os.environ:
         return "🦾 GoormIDE"
 
